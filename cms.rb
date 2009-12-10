@@ -11,6 +11,7 @@ database = 'mysql'
 # Cleanup
 run "rm public/index.html"
 run "rm public/images/rails.png"
+run "rm public/javascripts/{application,controls,dragdrop,effects,prototype}.js"
 run "rm -Rf test"
 
 # Git ignore
@@ -164,6 +165,17 @@ Gem.loaded_specs.values.each do |spec|
 end
 }
 
+file 'app/controllers/application_controller.rb', %{
+# Filters added to this controller apply to all controllers in the application.
+# Likewise, all the methods added will be available for all controllers.
+
+class ApplicationController < ActionController::Base
+  include CMS::ApplicationController
+  
+  # include any custom actions below this line
+end
+}
+
 # Rakefile
 file 'Rakefile', %{
 # Add your own tasks in files placed in lib/tasks ending in .rake,
@@ -273,7 +285,7 @@ end
 # Javascript
 file 'config/sprockets.yml', <<-FILE
 :default:
-  :asset_root: public
+  :asset_root: <%= Rails.root.join('public') %>
   :load_path:
     - app/javascripts/public
     - vendor/sprockets/*/src
@@ -285,7 +297,7 @@ file 'config/sprockets.yml', <<-FILE
     - app/javascripts/public/**/*.js
 
 :cms:
-  :asset_root: public
+  :asset_root: <%= Rails.root.join('public') %>
   :root: <%= CMS.root.expand_path %>
   :load_path:
     - app/javascripts
