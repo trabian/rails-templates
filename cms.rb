@@ -151,3 +151,40 @@ production:
   database: cms_#{app_name}
 CODE
 end
+
+# Javascript
+file 'config/sprockets.yml', <<-FILE
+:default:
+  :asset_root: public
+  :load_path:
+    - app/javascripts/public
+    - vendor/sprockets/*/src
+    - vendor/plugins/*/javascripts
+    - vendor/gems/*/app/javascripts
+    - <%= "\#{CMS.root.expand_path}/vendor/sprockets/*/src" %>
+  :source_files:
+    - app/javascripts/public/application.js
+    - app/javascripts/public/**/*.js
+
+:cms:
+  :asset_root: public
+  :root: <%= CMS.root.expand_path %>
+  :load_path:
+    - app/javascripts
+    - vendor/sprockets/*/src
+    - vendor/plugins/*/javascripts
+    - <%= RAILS_ROOT %>/app/javascripts
+  :source_files:
+    - app/javascripts/application.js
+    - app/javascripts/**/*.js
+    - <%= RAILS_ROOT %>/app/javascripts/cms/extend.js  
+  
+FILE
+
+file 'app/javascripts/application.js', <<-FILE
+//= require <jquery>
+
+;$(function() {});
+FILE
+
+rake 'sprockets:install_assets'
