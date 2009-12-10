@@ -72,7 +72,7 @@ run 'script/bundle'
 
 file 'config/preinitializer.rb', %{
 
-  require File.join(File.dirname(__FILE__), '..', "vendor", "bundler_gems", "environment")
+  require File.join(File.dirname(__FILE__), '..', "gems", "environment")
 
   gem_root = Dir[File.join(File.dirname(__FILE__), '..', 'gems', '*')].detect do |filename|
     File.basename(filename).match /^trabian_cms/
