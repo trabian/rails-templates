@@ -66,4 +66,6 @@ file 'Gemfile', %{
 
 run "mkdir -p bin/gems gems"
 
+puts "Preparing to install bundled gems.  This may take a while."
+
 run 'script/bundle'
