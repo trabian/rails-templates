@@ -69,3 +69,59 @@ run "mkdir -p bin/gems gems"
 puts "Preparing to install bundled gems.  This may take a while."
 
 run 'script/bundle'
+
+file 'config/preinitializer.rb', %{
+
+  require File.join(File.dirname(__FILE__), '..', "vendor", "bundler_gems", "environment")
+
+  gem_root = Dir[File.join(File.dirname(__FILE__), '..', 'gems', '*')].detect do |filename|
+    File.basename(filename).match /^trabian_cms/
+  end
+
+  CMS_ROOT = gem_root
+  $LOAD_PATH << File.join(gem_root, 'lib')
+  require 'trabian_cms'
+
+  # Authorization plugin for role based access control
+  # You can override default authorization system constants here.
+
+  # Can be 'object roles' or 'hardwired'
+  AUTHORIZATION_MIXIN = "object roles"
+
+  # NOTE : If you use modular controllers like '/admin/products' be sure 
+  # to redirect to something like '/sessions' controller (with a leading slash)
+  # as shown in the example below or you will not get redirected properly
+  #
+  # This can be set to a hash or to an explicit path like '/login'
+  #
+  LOGIN_REQUIRED_REDIRECTION = { :controller => 'admin/overview', :action => 'index' }
+  PERMISSION_DENIED_REDIRECTION = { :controller => 'admin/overview', :action => 'index' }
+
+  # The method your auth scheme uses to store the location to redirect back to 
+  STORE_LOCATION_METHOD = :store_location
+
+}.strip
+
+gsub_file 'config/boot.rb', 'Rails.boot!', %{
+
+class Rails::Boot
+  def run
+    load_initializer
+    extend_environment
+    Rails::Initializer.run(:set_load_path)
+  end
+
+  def extend_environment
+    Rails::Initializer.class_eval do
+      old_load = instance_method(:load_environment)
+      define_method(:load_environment) do
+        Bundler.require_env RAILS_ENV
+        old_load.bind(self).call
+      end
+    end
+  end
+end
+
+Rails.boot!
+
+}.strip
