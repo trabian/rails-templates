@@ -1,3 +1,5 @@
+CMS_VERSION='5.0.13'
+
 # Cleanup
 run "rm public/index.html"
 run "rm public/images/rails.png"
@@ -52,7 +54,7 @@ file 'Gemfile', %{
   source 'http://gemcutter.org'
   source 'http://gems.github.com'
 
-  gem "trabian_cms", "5.0.13", :git => "git@github.com:trabian/trabian_cms.git"
+  gem "trabian_cms", "#{CMS_VERSION}", :git => "git@github.com:trabian/trabian_cms.git"
 
   only :test do
     gem 'rspec', '1.2.8'
@@ -61,6 +63,7 @@ file 'Gemfile', %{
     gem 'webrat', '0.4.4'
     gem 'cucumber', '0.3.94'
     gem 'factory_girl', '1.2.2'
+    gem 'sqlite3'
   end
 }.strip
 
@@ -72,33 +75,33 @@ run 'script/bundle'
 
 file 'config/preinitializer.rb', %{
 
-  require File.join(File.dirname(__FILE__), '..', "gems", "environment")
+require File.join(File.dirname(__FILE__), '..', "gems", "environment")
 
-  gem_root = Dir[File.join(File.dirname(__FILE__), '..', 'gems', '*')].detect do |filename|
-    File.basename(filename).match /^trabian_cms/
-  end
+gem_root = Dir[File.join(File.dirname(__FILE__), '..', 'gems', 'dirs', '*')].detect do |filename|
+  File.basename(filename).match /^trabian_cms/
+end
 
-  CMS_ROOT = gem_root
-  $LOAD_PATH << File.join(gem_root, 'lib')
-  require 'trabian_cms'
+CMS_ROOT = gem_root
+$LOAD_PATH << File.join(gem_root, 'lib')
+require 'trabian_cms'
 
-  # Authorization plugin for role based access control
-  # You can override default authorization system constants here.
+# Authorization plugin for role based access control
+# You can override default authorization system constants here.
 
-  # Can be 'object roles' or 'hardwired'
-  AUTHORIZATION_MIXIN = "object roles"
+# Can be 'object roles' or 'hardwired'
+AUTHORIZATION_MIXIN = "object roles"
 
-  # NOTE : If you use modular controllers like '/admin/products' be sure 
-  # to redirect to something like '/sessions' controller (with a leading slash)
-  # as shown in the example below or you will not get redirected properly
-  #
-  # This can be set to a hash or to an explicit path like '/login'
-  #
-  LOGIN_REQUIRED_REDIRECTION = { :controller => 'admin/overview', :action => 'index' }
-  PERMISSION_DENIED_REDIRECTION = { :controller => 'admin/overview', :action => 'index' }
+# NOTE : If you use modular controllers like '/admin/products' be sure 
+# to redirect to something like '/sessions' controller (with a leading slash)
+# as shown in the example below or you will not get redirected properly
+#
+# This can be set to a hash or to an explicit path like '/login'
+#
+LOGIN_REQUIRED_REDIRECTION = { :controller => 'admin/overview', :action => 'index' }
+PERMISSION_DENIED_REDIRECTION = { :controller => 'admin/overview', :action => 'index' }
 
-  # The method your auth scheme uses to store the location to redirect back to 
-  STORE_LOCATION_METHOD = :store_location
+# The method your auth scheme uses to store the location to redirect back to 
+STORE_LOCATION_METHOD = :store_location
 
 }.strip
 
