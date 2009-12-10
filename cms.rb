@@ -1,4 +1,4 @@
-CMS_VERSION='5.0.15'
+CMS_VERSION='5.0.16'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 solr_port = ENV['CMS_SOLR_PORT'] || ask("What's the starting port for the SOLR server?")
