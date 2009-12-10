@@ -1,4 +1,4 @@
-CMS_VERSION='5.0.14'
+CMS_VERSION='5.0.15'
 
 # Cleanup
 run "rm public/index.html"
@@ -170,7 +170,7 @@ require 'rake/rdoctask'
 require 'tasks/rails'
 require 'tasks/cms'
 
-require CMS.root.join('vendor', 'plugins', 'sunspot_rails', 'lib', 'sunspot', 'rails', 'tasks')
+require 'sunspot/rails/tasks'
 }
 
 solr_port = ENV['CMS_SOLR_PORT'] || ask("What's the starting port for the SOLR server?")
