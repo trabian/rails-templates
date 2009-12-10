@@ -1,4 +1,4 @@
-CMS_VERSION='5.0.13'
+CMS_VERSION='5.0.14'
 
 # Cleanup
 run "rm public/index.html"
