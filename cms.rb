@@ -139,11 +139,11 @@ Rails::Initializer.run do |config|
 
   config.plugin_paths << File.join(CMS_ROOT, 'vendor', 'plugins')
 
-  config.load_paths += %W( #{RAILS_ROOT}/app/panels #{RAILS_ROOT}/app/presenters #{RAILS_ROOT}/app/middleware )
+  config.load_paths += %W( \#{RAILS_ROOT}/app/panels \#{RAILS_ROOT}/app/presenters \#{RAILS_ROOT}/app/middleware )
 
   config.action_controller.page_cache_directory = RAILS_ROOT + "/public/cache/"
 
-  config.middleware.use(Rack::Cache, :verbose => true, :metastore => "file:#{CMS.metastore}", :entitystore => "file:#{CMS.entitystore}")
+  config.middleware.use(Rack::Cache, :verbose => true, :metastore => "file:\#{CMS.metastore}", :entitystore => "file:\#{CMS.entitystore}")
 
   config.time_zone = 'Central Time (US & Canada)'
 
