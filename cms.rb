@@ -122,6 +122,4 @@ class Rails::Boot
   end
 end
 
-Rails.boot!
-
 }.strip
