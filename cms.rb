@@ -37,14 +37,14 @@ $LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "gem
 require 'rubygems'
 require 'rubygems/command'
 require 'bundler'
-require 'bundler/command/bundle_command'
+require 'bundler/commands/bundle_command'
 Gem::Commands::BundleCommand.new.invoke(*ARGV)
 }.strip
 
 run 'chmod +x script/bundle'
 
 file 'Gemfile', %{
-  bundle_path 'vendor/bundler_gems'
+  bundle_path 'gems'
   bin_path "bin/gems/"
   disable_system_gems
   clear_sources
@@ -64,6 +64,6 @@ file 'Gemfile', %{
   end
 }.strip
 
-run "mkdir -p bin/gems vendor/bundler_gems"
+run "mkdir -p bin/gems gems"
 
 run 'script/bundle'
