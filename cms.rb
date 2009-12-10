@@ -124,6 +124,23 @@ class Rails::Boot
 end
 }
 
+# Rakefile
+file 'Rakefile', %{
+# Add your own tasks in files placed in lib/tasks ending in .rake,
+# for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
+
+require(File.join(File.dirname(__FILE__), 'config', 'boot'))
+
+require 'rake'
+require 'rake/testtask'
+require 'rake/rdoctask'
+
+require 'tasks/rails'
+require 'tasks/cms'
+
+require CMS.root.join('vendor', 'plugins', 'sunspot_rails', 'lib', 'sunspot', 'rails', 'tasks')
+}
+
 # Database
 # database = ENV['CMS_DATABASE'] || ask("Which database would you like to use? (mysql|sqlite3)")
 database = 'mysql'
@@ -152,22 +169,50 @@ production:
 CODE
 end
 
-# Rakefile
-file 'Rakefile', %{
-# Add your own tasks in files placed in lib/tasks ending in .rake,
-# for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
+seed = ENV['CMS_SEED_DB'] || ask("Do you want to seed the database (yN)?")
 
-require(File.join(File.dirname(__FILE__), 'config', 'boot'))
+if seed == "y"
+  
+  # Seed database
+  title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
-require 'rake'
-require 'rake/testtask'
-require 'rake/rdoctask'
+  file 'db/fixtures/settings.rb', <<-FILE
+  Setting.seed do |s|
+    s.name = 'title'
+    s.value = "#{title}"
+  end
+  FILE
 
-require 'tasks/rails'
-require 'tasks/cms'
+  file 'db/fixtures/sections.rb', <<-FILE
+  Section.seed do |s|
+    s.content_id = 1
+    s.name = "Home"
+  end
 
-require CMS.root.join('vendor', 'plugins', 'sunspot_rails', 'lib', 'sunspot', 'rails', 'tasks')
-}
+  Content.seed do |c|
+  end
+  FILE
+
+  file 'db/fixtures/users.rb', <<-FILE
+  User.seed(:login) do |s|
+    s.id = 1
+    s.name = "Admin"
+    s.login = "admin"
+    s.email = "admin@trabian.com"
+    s.password = s.password_confirmation = "admin"
+  end
+
+  admin = User.find(1)
+  admin.has_role('full_admin')
+  FILE
+
+  rake "cms:migrate:copy"
+  rake "db:migrate"
+  rake "db:seed"
+
+  puts "A user has been created with a login of 'admin' and a password of 'admin'"
+
+end
 
 # Javascript
 file 'config/sprockets.yml', <<-FILE
