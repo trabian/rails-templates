@@ -63,7 +63,6 @@ file 'Gemfile', %{
     gem 'webrat', '0.4.4'
     gem 'cucumber', '0.3.94'
     gem 'factory_girl', '1.2.2'
-    gem 'sqlite3'
   end
 }.strip
 
@@ -124,3 +123,31 @@ class Rails::Boot
   end
 end
 }
+
+# Database
+# database = ENV['CMS_DATABASE'] || ask("Which database would you like to use? (mysql|sqlite3)")
+database = 'mysql'
+
+if (database == 'mysql')
+  app_name = File.basename(@root)
+
+  db_user = ENV['CMS_DB_USER'] || ask("What's your database username?")
+  db_pass = ENV['CMS_DB_PASSWORD'] || ask("What's your database password?")
+
+  file 'config/database.yml', <<-CODE
+development: &base
+  adapter: mysql
+  host: localhost
+  username: #{db_user}
+  password: #{db_pass}
+  database: cms_#{app_name}
+
+test:
+  <<: *base
+  database: cms_#{app_name}_test
+
+production:
+  <<: *base
+  database: cms_#{app_name}
+CODE
+end
