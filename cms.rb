@@ -173,6 +173,31 @@ require 'tasks/cms'
 require CMS.root.join('vendor', 'plugins', 'sunspot_rails', 'lib', 'sunspot', 'rails', 'tasks')
 }
 
+solr_port = ENV['CMS_SOLR_PORT'] || ask("What's the starting port for the SOLR server?")
+
+# Sunspot
+file 'config/sunspot.yml', %{
+  production:
+    solr:
+      hostname: localhost
+      port: #{solr_port.to_i + 2}
+      log_level: WARNING
+
+  development:
+    solr:
+      hostname: localhost
+      port: #{solr_port.to_i + 1}
+      log_level: INFO
+
+  test:
+    solr:
+      hostname: localhost
+      port: #{solr_port}
+      log_level: WARNING
+}
+
+rake "sunspot:solr:start"
+
 # Database
 # database = ENV['CMS_DATABASE'] || ask("Which database would you like to use? (mysql|sqlite3)")
 database = 'mysql'
