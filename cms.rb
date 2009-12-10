@@ -102,7 +102,7 @@ file 'config/preinitializer.rb', %{
 
 }.strip
 
-gsub_file 'config/boot.rb', 'Rails.boot!', %{
+gsub_file 'config/boot.rb', '# All that for this:', %{
 
 class Rails::Boot
   def run
