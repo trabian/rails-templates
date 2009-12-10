@@ -169,10 +169,12 @@ production:
 CODE
 end
 
-seed = ENV['CMS_SEED_DB'] || ask("Do you want to seed the database (yN)?")
+seed = ENV['CMS_SEED_DB'] || ask("Do you want to create and seed the database (yN)?")
 
 if seed == "y"
-  
+
+  rake "db:create"
+
   # Seed database
   title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
