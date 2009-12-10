@@ -103,7 +103,6 @@ file 'config/preinitializer.rb', %{
 }.strip
 
 gsub_file 'config/boot.rb', '# All that for this:', %{
-
 class Rails::Boot
   def run
     load_initializer
@@ -122,4 +121,4 @@ class Rails::Boot
   end
 end
 
-}.strip
+}
