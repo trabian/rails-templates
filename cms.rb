@@ -120,5 +120,4 @@ class Rails::Boot
     end
   end
 end
-
 }
