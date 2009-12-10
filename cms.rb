@@ -124,6 +124,38 @@ class Rails::Boot
 end
 }
 
+file 'config/environment.rb', %{
+# Specifies gem version of Rails to use when vendor/rails is not present
+RAILS_GEM_VERSION = '2.3.4' unless defined? RAILS_GEM_VERSION
+
+require 'rubygems'
+gem 'rack-cache'
+require 'rack/cache'
+
+# Bootstrap the Rails environment, frameworks, and default configuration
+require File.join(File.dirname(__FILE__), 'boot')
+
+Rails::Initializer.run do |config|
+
+  config.plugin_paths << File.join(CMS_ROOT, 'vendor', 'plugins')
+
+  config.load_paths += %W( #{RAILS_ROOT}/app/panels #{RAILS_ROOT}/app/presenters #{RAILS_ROOT}/app/middleware )
+
+  config.action_controller.page_cache_directory = RAILS_ROOT + "/public/cache/"
+
+  config.middleware.use(Rack::Cache, :verbose => true, :metastore => "file:#{CMS.metastore}", :entitystore => "file:#{CMS.entitystore}")
+
+  config.time_zone = 'Central Time (US & Canada)'
+
+end
+
+Gem.loaded_specs.values.each do |spec|
+  returning File.expand_path("init.rb", spec.full_gem_path) do |init_path|
+    require init_path if File.exists?(init_path)
+  end
+end
+}
+
 # Rakefile
 file 'Rakefile', %{
 # Add your own tasks in files placed in lib/tasks ending in .rake,
