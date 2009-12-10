@@ -1,12 +1,16 @@
-CMS_VERSION='5.0.16'
+CMS_VERSION='5.0.17'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
-solr_port = ENV['CMS_SOLR_PORT'] || ask("What's the starting port for the SOLR server?")
-seed = ENV['CMS_SEED_DB'] || ask("Do you want to create and seed the database (yN)?")
+
+# solr_port = ENV['CMS_SOLR_PORT'] || ask("What's the starting port for the SOLR server?")
+# seed = ENV['CMS_SEED_DB'] || ask("Do you want to create and seed the database (yN)?")
 db_user = ENV['CMS_DB_USER'] || ask("What's your database username?")
 db_pass = ENV['CMS_DB_PASSWORD'] || ask("What's your database password?")
 # database = ENV['CMS_DATABASE'] || ask("Which database would you like to use? (mysql|sqlite3)")
+
+seed = 'y'
 database = 'mysql'
+solr_port = 8991
 
 # Cleanup
 run "rm public/index.html"
@@ -318,3 +322,9 @@ file 'app/javascripts/application.js', <<-FILE
 FILE
 
 rake 'sprockets:install_assets'
+
+git :init
+
+git :add => "."
+
+git :commit => "-a -m 'Initial commit'"
