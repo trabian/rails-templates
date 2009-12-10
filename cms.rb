@@ -1,5 +1,13 @@
 CMS_VERSION='5.0.15'
 
+title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
+solr_port = ENV['CMS_SOLR_PORT'] || ask("What's the starting port for the SOLR server?")
+seed = ENV['CMS_SEED_DB'] || ask("Do you want to create and seed the database (yN)?")
+db_user = ENV['CMS_DB_USER'] || ask("What's your database username?")
+db_pass = ENV['CMS_DB_PASSWORD'] || ask("What's your database password?")
+# database = ENV['CMS_DATABASE'] || ask("Which database would you like to use? (mysql|sqlite3)")
+database = 'mysql'
+
 # Cleanup
 run "rm public/index.html"
 run "rm public/images/rails.png"
@@ -173,8 +181,6 @@ require 'tasks/cms'
 require 'sunspot/rails/tasks'
 }
 
-solr_port = ENV['CMS_SOLR_PORT'] || ask("What's the starting port for the SOLR server?")
-
 # Sunspot
 file 'config/sunspot.yml', %{
   production:
@@ -199,14 +205,8 @@ file 'config/sunspot.yml', %{
 rake "sunspot:solr:start"
 
 # Database
-# database = ENV['CMS_DATABASE'] || ask("Which database would you like to use? (mysql|sqlite3)")
-database = 'mysql'
-
 if (database == 'mysql')
   app_name = File.basename(@root)
-
-  db_user = ENV['CMS_DB_USER'] || ask("What's your database username?")
-  db_pass = ENV['CMS_DB_PASSWORD'] || ask("What's your database password?")
 
   file 'config/database.yml', <<-CODE
 development: &base
@@ -226,14 +226,11 @@ production:
 CODE
 end
 
-seed = ENV['CMS_SEED_DB'] || ask("Do you want to create and seed the database (yN)?")
-
 if seed == "y"
 
   rake "db:create"
 
   # Seed database
-  title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
   file 'db/fixtures/settings.rb', <<-FILE
   Setting.seed do |s|
