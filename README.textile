@@ -1,0 +1,3 @@
+To use:
+
+bc. rails -m http://github.com/trabian/rails-templates/raw/master/cms.rb [site name]
