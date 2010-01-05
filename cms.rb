@@ -168,6 +168,7 @@ Gem.loaded_specs.values.each do |spec|
   end
 end
 
+# Used by uploadify
 ActionController::Dispatcher.middleware.insert_before(
   ActionController::Session::CookieStore,
   FlashSessionCookieMiddleware,
