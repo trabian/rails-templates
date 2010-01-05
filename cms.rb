@@ -167,6 +167,15 @@ Gem.loaded_specs.values.each do |spec|
     require init_path if File.exists?(init_path)
   end
 end
+
+ActionController::Dispatcher.middleware.insert_before(
+  ActionController::Session::CookieStore,
+  FlashSessionCookieMiddleware,
+  ActionController::Base.session_options[:key]
+)
+
+CMS.start
+
 }
 
 file 'app/controllers/application_controller.rb', %{
