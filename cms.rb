@@ -89,9 +89,11 @@ file 'config/preinitializer.rb', %{
 
 require File.join(File.dirname(__FILE__), '..', "gems", "environment")
 
-gem_root = Dir[File.join(File.dirname(__FILE__), '..', 'gems', 'dirs', '*')].detect do |filename|
-  File.basename(filename).match /^trabian_cms/
+cms_lib_dir = $LOAD_PATH.detect do |filename|
+  filename.match /dirs\/trabian_cms\/lib$/
 end
+
+gem_root = cms_lib_dir.gsub('/lib', '')
 
 CMS_ROOT = gem_root
 $LOAD_PATH << File.join(gem_root, 'lib')
