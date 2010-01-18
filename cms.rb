@@ -1,4 +1,4 @@
-CMS_VERSION='5.1.5'
+CMS_VERSION='5.1.6'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
