@@ -18,6 +18,14 @@ run "rm public/images/rails.png"
 run "rm public/javascripts/{application,controls,dragdrop,effects,prototype}.js"
 run "rm -Rf test"
 
+# Make sure this is near the top so that app/javascripts is available for less_routes.js generation
+file 'app/javascripts/application.js', <<-FILE
+//= require <jquery>
+
+;$(function() {});
+FILE
+
+
 # Git ignore
 file '.gitignore', %{
 .DS_Store
@@ -90,7 +98,7 @@ file 'config/preinitializer.rb', %{
 require File.join(File.dirname(__FILE__), '..', "gems", "environment")
 
 cms_lib_dir = $LOAD_PATH.detect do |filename|
-  filename.match /dirs\/trabian_cms\/lib$/
+  filename.match /dirs\\/trabian_cms\\/lib$/
 end
 
 gem_root = cms_lib_dir.gsub('/lib', '')
@@ -325,12 +333,6 @@ file 'config/sprockets.yml', <<-FILE
     - app/javascripts/**/*.js
     - <%= RAILS_ROOT %>/app/javascripts/cms/extend.js  
   
-FILE
-
-file 'app/javascripts/application.js', <<-FILE
-//= require <jquery>
-
-;$(function() {});
 FILE
 
 rake 'sprockets:install_assets'
