@@ -337,6 +337,36 @@ FILE
 
 rake 'sprockets:install_assets'
 
+file 'Capfile', <<-FILE
+load 'config/preinitializer.rb'
+load 'deploy' if respond_to?(:namespace) # cap2 differentiator
+Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
+Dir["\#{CMS_ROOT}/vendor/plugins/*/recipes/*.rb"].each { |plugin|
+  load(plugin)
+}
+load 'config/deploy'
+FILE
+
+file 'config/deploy/production.rb', <<-FILE
+set :gateway, "gateway.cluster1.trabian.com"
+
+role :web, "web2.cluster1.trabian.com"
+role :app, "web2.cluster1.trabian.com", :primary => true
+role :app, "web1.cluster1.trabian.com"
+role :db, "web2.cluster1.trabian.com", :primary => true
+
+role :primary_app, "web2.cluster1.trabian.com"
+
+set :domain, "web2.cluster1.trabian.com"
+FILE
+
+file 'config/deploy/staging.rb', <<-FILE
+set :domain, "staging.trabian.com"
+set :remote_db, "http://root:staging@\#{domain}:5000"
+
+server domain, :app, :db, :web, :primary => true
+FILE
+
 git :init
 
 git :add => "."
