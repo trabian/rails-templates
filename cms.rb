@@ -47,10 +47,10 @@ gems/*
 !gems/bundler
 }.strip
 
-# Install Bundler
+Install Bundler
 inside 'gems/bundler' do
   run 'git init'
-  run 'git pull --depth 1 git://github.com/wycats/bundler.git'
+  run 'git pull --depth 1 git://github.com/carlhuda/bundler'
   run 'rm -rf .git .gitignore'
 end
 
