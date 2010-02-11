@@ -50,7 +50,7 @@ gems/*
 Install Bundler
 inside 'gems/bundler' do
   run 'git init'
-  run 'git pull --depth 1 git://github.com/carlhuda/bundler'
+  run 'git pull --depth 1 git://github.com/carlhuda/bundler.git'
   run 'rm -rf .git .gitignore'
 end
 
