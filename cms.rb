@@ -1,4 +1,4 @@
-CMS_VERSION='5.1.6'
+CMS_VERSION='5.1.13'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
@@ -48,10 +48,16 @@ gems/*
 }.strip
 
 # Install Bundler
-inside 'gems/bundler' do
-  run 'git init'
-  run 'git pull --depth 1 git://github.com/carlhuda/bundler.git'
-  run 'rm -rf .git .gitignore'
+# inside 'gems/bundler' do
+  # run 'git init'
+  # run 'git pull --depth 1 git://github.com/carlhuda/bundler.git'
+  # run 'rm -rf .git .gitignore'
+# end
+inside 'gems' do
+  run 'curl -L http://github.com/carlhuda/bundler/tarball/v0.8 -o "bundler.tar.gz"'
+  run 'tar xzf bundler.tar.gz'
+  run 'mv carlhuda-bundler-2ba4a35 bundler'  # this is the directory name that comes out of the tarball
+  run 'rm bundler.tar.gz'
 end
 
 file 'script/bundle', %{
