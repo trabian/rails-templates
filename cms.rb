@@ -1,4 +1,20 @@
-CMS_VERSION='5.1.16'
+begin
+  require 'rubygems'
+  require 'bundler'
+
+  if Bundler::VERSION <= "0.9.5"
+    raise LoadError
+  end
+
+rescue LoadError
+
+  raise RuntimeError, "Bundler incompatible.\n" +
+    "Your bundler version is incompatible with the Trabian CMS.\n" +
+    "Run `sudo gem install bundler` to install or upgrade."
+
+end
+
+CMS_VERSION='5.1.22'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
@@ -47,64 +63,49 @@ gems/*
 !gems/bundler
 }.strip
 
-# Install Bundler
-# inside 'gems/bundler' do
-  # run 'git init'
-  # run 'git pull --depth 1 git://github.com/carlhuda/bundler.git'
-  # run 'rm -rf .git .gitignore'
-# end
-inside 'gems' do
-  run 'curl -L http://github.com/carlhuda/bundler/tarball/v0.8 -o "bundler.tar.gz"'
-  run 'tar xzf bundler.tar.gz'
-  run 'mv carlhuda-bundler-2ba4a35 bundler'  # this is the directory name that comes out of the tarball
-  run 'rm bundler.tar.gz'
-end
-
-file 'script/bundle', %{
-#!/usr/bin/env ruby
-$LOAD_PATH.unshift File.expand_path(File.join(File.dirname(__FILE__), "..", "gems/bundler/lib"))
-require 'rubygems'
-require 'rubygems/command'
-require 'bundler'
-require 'bundler/commands/bundle_command'
-Gem::Commands::BundleCommand.new.invoke(*ARGV)
-}.strip
-
-run 'chmod +x script/bundle'
-
 file 'Gemfile', %{
-  bundle_path 'gems'
-  bin_path "bin/gems/"
-  disable_system_gems
-  clear_sources
+source :gemcutter
+source 'http://gems.github.com'
 
-  source 'http://gemcutter.org'
-  source 'http://gems.github.com'
+git "git@github.com:trabian/trabian_cms.git"
+gem "trabian_cms", "#{CMS_VERSION}"
 
-  gem "trabian_cms", "#{CMS_VERSION}", :git => "git@github.com:trabian/trabian_cms.git"
-
-  only :test do
-    gem 'rspec', '1.2.8'
-    gem 'rspec-rails', '1.2.7.1'
-    gem 'carlosbrando-remarkable', '2.3.1'
-    gem 'webrat', '0.4.4'
-    gem 'cucumber', '0.3.94'
-    gem 'factory_girl', '1.2.2'
-  end
+group :test do
+  gem 'rspec', '1.2.8'
+  gem 'rspec-rails', '1.2.7.1'
+  gem 'carlosbrando-remarkable', '2.3.1'
+  gem 'webrat', '0.4.4'
+  gem 'cucumber', '0.3.94'
+  gem 'factory_girl', '1.2.2'
+end
 }.strip
 
-run "mkdir -p bin/gems gems"
-
-puts "Preparing to install bundled gems.  This may take a while."
-
-run 'script/bundle'
+run 'bundle install'
 
 file 'config/preinitializer.rb', %{
 
-require File.join(File.dirname(__FILE__), '..', "gems", "environment")
+class Pathname  
+  def empty?  
+    to_s.empty?  
+  end
+end
+
+begin
+  require File.expand_path('../../.bundle/environment', __FILE__)
+rescue LoadError
+  require 'rubygems'
+  require 'bundler'
+  if Bundler::VERSION <= "0.9.5"
+    raise RuntimeError, "Bundler incompatible.\n" +
+      "Your bundler version is incompatible with Rails 2.3 and an unlocked bundle.\n" +
+      "Run `gem install bundler` to upgrade or `bundle lock` to lock."
+  else
+    Bundler.setup
+  end
+end
 
 cms_lib_dir = $LOAD_PATH.detect do |filename|
-  filename.match /dirs\\/trabian_cms\\/lib$/
+  filename.match /trabian_cms/
 end
 
 gem_root = cms_lib_dir.gsub('/lib', '')
@@ -145,7 +146,7 @@ class Rails::Boot
     Rails::Initializer.class_eval do
       old_load = instance_method(:load_environment)
       define_method(:load_environment) do
-        Bundler.require_env RAILS_ENV
+        Bundler.require :default, Rails.env
         old_load.bind(self).call
       end
     end
