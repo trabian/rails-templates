@@ -14,7 +14,7 @@ rescue LoadError
 
 end
 
-CMS_VERSION='5.1.27'
+CMS_VERSION='5.1.28'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
