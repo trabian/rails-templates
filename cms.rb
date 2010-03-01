@@ -14,7 +14,7 @@ rescue LoadError
 
 end
 
-CMS_VERSION='5.1.22'
+CMS_VERSION='5.1.27'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
@@ -35,8 +35,9 @@ run "rm public/javascripts/{application,controls,dragdrop,effects,prototype}.js"
 run "rm -Rf test"
 
 # Make sure this is near the top so that app/javascripts is available for less_routes.js generation
-file 'app/javascripts/application.js', <<-FILE
+file 'app/javascripts/public/application.js', <<-FILE
 //= require <jquery>
+//= require <overlay>
 
 ;$(function() {});
 FILE
@@ -339,7 +340,18 @@ file 'config/sprockets.yml', <<-FILE
     - app/javascripts/application.js
     - app/javascripts/**/*.js
     - <%= RAILS_ROOT %>/app/javascripts/cms/extend.js  
-  
+
+:overlay:
+  :asset_root: <%= Rails.root.join('public') %>
+  :root: <%= CMS.root.expand_path %>
+  :load_path:
+    - app/javascripts
+    - vendor/sprockets/*/src
+    - vendor/plugins/*/javascripts
+    - <%= RAILS_ROOT %>/app/javascripts
+  :source_files:
+    - app/javascripts/overlay.js
+
 FILE
 
 rake 'sprockets:install_assets'
