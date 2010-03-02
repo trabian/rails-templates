@@ -14,7 +14,7 @@ rescue LoadError
 
 end
 
-CMS_VERSION='5.1.28'
+CMS_VERSION='5.1.31'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
@@ -37,7 +37,7 @@ run "rm -Rf test"
 # Make sure this is near the top so that app/javascripts is available for less_routes.js generation
 file 'app/javascripts/public/application.js', <<-FILE
 //= require <jquery>
-//= require <overlay>
+//= require <public>
 
 ;$(function() {});
 FILE
