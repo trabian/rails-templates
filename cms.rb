@@ -1,18 +1,5 @@
-begin
-  require 'rubygems'
-  require 'bundler'
-
-  if Bundler::VERSION <= "0.9.5"
-    raise LoadError
-  end
-
-rescue LoadError
-
-  raise RuntimeError, "Bundler incompatible.\n" +
-    "Your bundler version is incompatible with the Trabian CMS.\n" +
-    "Run `sudo gem install bundler` to install or upgrade."
-
-end
+require 'rubygems'
+require 'bundler'
 
 CMS_VERSION='5.1.28'
 
