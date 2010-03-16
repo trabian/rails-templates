@@ -296,7 +296,7 @@ if seed == "y"
     s.id = 1
     s.name = "Admin"
     s.email = "admin@trabian.com"
-    s.password = s.password_confirmation = "temppass"
+    s.password = s.password_confirmation = "password"
   end
 
   admin = User.find(1)
@@ -307,7 +307,7 @@ if seed == "y"
   rake "db:migrate"
   rake "db:seed"
 
-  puts "A user has been created with a login of 'admin@trabian.com' and a password of 'temppass'"
+  puts "A user has been created with a login of 'admin@trabian.com' and a password of 'password'"
 
 end
 
