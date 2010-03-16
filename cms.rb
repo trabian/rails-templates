@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'bundler'
 
-CMS_VERSION='5.1.28'
+CMS_VERSION='5.2.1'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
@@ -24,7 +24,6 @@ run "rm -Rf test"
 # Make sure this is near the top so that app/javascripts is available for less_routes.js generation
 file 'app/javascripts/public/application.js', <<-FILE
 //= require <jquery>
-//= require <overlay>
 
 ;$(function() {});
 FILE
@@ -55,8 +54,8 @@ file 'Gemfile', %{
 source :gemcutter
 source 'http://gems.github.com'
 
-git "git@github.com:trabian/trabian_cms.git"
-gem "trabian_cms", "#{CMS_VERSION}"
+git "git@github.com:trabian/trabian_cms.git", :tag => "#{CMS_VERSION}"
+gem "trabian_cms"
 
 group :test do
   gem 'rspec', '1.2.8'
@@ -83,13 +82,7 @@ begin
 rescue LoadError
   require 'rubygems'
   require 'bundler'
-  if Bundler::VERSION <= "0.9.5"
-    raise RuntimeError, "Bundler incompatible.\n" +
-      "Your bundler version is incompatible with Rails 2.3 and an unlocked bundle.\n" +
-      "Run `gem install bundler` to upgrade or `bundle lock` to lock."
-  else
-    Bundler.setup
-  end
+  Bundler.setup
 end
 
 cms_lib_dir = $LOAD_PATH.detect do |filename|
@@ -122,7 +115,7 @@ STORE_LOCATION_METHOD = :store_location
 
 }.strip
 
-gsub_file 'config/boot.rb', '# All that for this:', %{
+gsub_file 'config/boot.rb', 'Rails.boot!', %{
 class Rails::Boot
   def run
     load_initializer
@@ -137,6 +130,30 @@ class Rails::Boot
         Bundler.require :default, Rails.env
         old_load.bind(self).call
       end
+    end
+  end
+end
+
+Rails.boot!
+
+class Rails::Plugin::GemLocator
+  # find the original that we patch in rails/lib/rails/plugin/locator.rb:80
+  def plugins
+    specs     = Bundler.load.specs_for(:default, Rails.env)
+    specs    += Gem.loaded_specs.values.select do |spec|
+      spec.loaded_from && # prune stubs
+        # File.exist?(File.join(spec.full_gem_path, "rails", "init.rb"))
+        (File.exist?(File.join(spec.full_gem_path, "rails", "init.rb")) || File.exist?(File.join(spec.full_gem_path, "init.rb")))
+    end
+    specs.compact!
+ 
+    require "rubygems/dependency_list"
+ 
+    deps = Gem::DependencyList.new
+    deps.add(*specs) unless specs.empty?
+ 
+    deps.dependency_order.collect do |spec|
+      Rails::GemPlugin.new(spec, nil)
     end
   end
 end
@@ -165,12 +182,6 @@ Rails::Initializer.run do |config|
 
   config.time_zone = 'Central Time (US & Canada)'
 
-end
-
-Gem.loaded_specs.values.each do |spec|
-  returning File.expand_path("init.rb", spec.full_gem_path) do |init_path|
-    require init_path if File.exists?(init_path)
-  end
 end
 
 # Used by uploadify
@@ -284,9 +295,8 @@ if seed == "y"
   User.seed(:login) do |s|
     s.id = 1
     s.name = "Admin"
-    s.login = "admin"
     s.email = "admin@trabian.com"
-    s.password = s.password_confirmation = "admin"
+    s.password = s.password_confirmation = "temppass"
   end
 
   admin = User.find(1)
@@ -297,49 +307,9 @@ if seed == "y"
   rake "db:migrate"
   rake "db:seed"
 
-  puts "A user has been created with a login of 'admin' and a password of 'admin'"
+  puts "A user has been created with a login of 'admin@trabian.com' and a password of 'temppass'"
 
 end
-
-# Javascript
-file 'config/sprockets.yml', <<-FILE
-:default:
-  :asset_root: <%= Rails.root.join('public') %>
-  :load_path:
-    - app/javascripts/public
-    - vendor/sprockets/*/src
-    - vendor/plugins/*/javascripts
-    - vendor/gems/*/app/javascripts
-    - <%= "\#{CMS.root.expand_path}/vendor/sprockets/*/src" %>
-  :source_files:
-    - app/javascripts/public/application.js
-    - app/javascripts/public/**/*.js
-
-:cms:
-  :asset_root: <%= Rails.root.join('public') %>
-  :root: <%= CMS.root.expand_path %>
-  :load_path:
-    - app/javascripts
-    - vendor/sprockets/*/src
-    - vendor/plugins/*/javascripts
-    - <%= RAILS_ROOT %>/app/javascripts
-  :source_files:
-    - app/javascripts/application.js
-    - app/javascripts/**/*.js
-    - <%= RAILS_ROOT %>/app/javascripts/cms/extend.js  
-
-:overlay:
-  :asset_root: <%= Rails.root.join('public') %>
-  :root: <%= CMS.root.expand_path %>
-  :load_path:
-    - app/javascripts
-    - vendor/sprockets/*/src
-    - vendor/plugins/*/javascripts
-    - <%= RAILS_ROOT %>/app/javascripts
-  :source_files:
-    - app/javascripts/overlay.js
-
-FILE
 
 rake 'sprockets:install_assets'
 
