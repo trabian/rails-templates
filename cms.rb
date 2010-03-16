@@ -24,10 +24,6 @@ run "rm -Rf test"
 # Make sure this is near the top so that app/javascripts is available for less_routes.js generation
 file 'app/javascripts/public/application.js', <<-FILE
 //= require <jquery>
-<<<<<<< HEAD
-//= require <public>
-=======
->>>>>>> c3d5dfa873d8d572f9550d3ab125d882f32b8695
 
 ;$(function() {});
 FILE
@@ -58,7 +54,7 @@ file 'Gemfile', %{
 source :gemcutter
 source 'http://gems.github.com'
 
-git "git@github.com:trabian/trabian_cms.git", :tag => "#{CMS_VERSION}"
+git "git@github.com:trabian/trabian_cms.git", :tag => "v#{CMS_VERSION}"
 gem "trabian_cms"
 
 group :test do
