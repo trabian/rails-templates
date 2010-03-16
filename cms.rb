@@ -1,11 +1,7 @@
 require 'rubygems'
 require 'bundler'
 
-<<<<<<< HEAD
-CMS_VERSION='5.1.31'
-=======
-CMS_VERSION='5.2.1'
->>>>>>> c3d5dfa873d8d572f9550d3ab125d882f32b8695
+CMS_VERSION='5.2.2'
 
 title = ENV['CMS_TITLE'] || ask("What's the title of the site?")
 
