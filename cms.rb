@@ -207,9 +207,9 @@ end
 }
 
 file 'config/routes.rb', %{
-  ActionController::Routing::Routes.draw do |map|
-    map.section '*path', :controller => 'sections', :action => 'show'
-  end
+ActionController::Routing::Routes.draw do |map|
+  map.section '*path', :controller => 'sections', :action => 'show'
+end
 }
 
 # Rakefile
