@@ -206,6 +206,12 @@ class ApplicationController < ActionController::Base
 end
 }
 
+file 'config/routes.rb', %{
+  ActionController::Routing::Routes.draw do |map|
+    map.section '*path', :controller => 'sections', :action => 'show'
+  end
+}
+
 # Rakefile
 file 'Rakefile', %{
 # Add your own tasks in files placed in lib/tasks ending in .rake,
