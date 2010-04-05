@@ -86,7 +86,7 @@ rescue LoadError
 end
 
 cms_lib_dir = $LOAD_PATH.detect do |filename|
-  filename.match /trabian_cms/
+  filename.match /trabian_cms[^_]/
 end
 
 gem_root = cms_lib_dir.gsub('/lib', '')
