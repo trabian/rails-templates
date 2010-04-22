@@ -119,19 +119,17 @@ gsub_file 'config/boot.rb', 'Rails.boot!', %{
 class Rails::Boot
   def run
     load_initializer
-    extend_environment
-    Rails::Initializer.run(:set_load_path)
-  end
 
-  def extend_environment
     Rails::Initializer.class_eval do
-      old_load = instance_method(:load_environment)
-      define_method(:load_environment) do
-        Bundler.require :default, Rails.env
-        old_load.bind(self).call
+      def load_gems
+        @bundler_loaded ||= Bundler.require :default, Rails.env
       end
     end
+
+    Rails::Initializer.run(:set_load_path)
+
   end
+
 end
 
 Rails.boot!
@@ -139,24 +137,29 @@ Rails.boot!
 class Rails::Plugin::GemLocator
   # find the original that we patch in rails/lib/rails/plugin/locator.rb:80
   def plugins
-    specs     = Bundler.load.specs_for(:default, Rails.env)
+    specs = begin
+      Bundler::SPECS
+    rescue
+      Bundler.load.send(:specs_for, [:default, Rails.env])
+    end
     specs    += Gem.loaded_specs.values.select do |spec|
       spec.loaded_from && # prune stubs
         # File.exist?(File.join(spec.full_gem_path, "rails", "init.rb"))
         (File.exist?(File.join(spec.full_gem_path, "rails", "init.rb")) || File.exist?(File.join(spec.full_gem_path, "init.rb")))
     end
     specs.compact!
- 
+
     require "rubygems/dependency_list"
- 
+
     deps = Gem::DependencyList.new
     deps.add(*specs) unless specs.empty?
- 
+
     deps.dependency_order.collect do |spec|
       Rails::GemPlugin.new(spec, nil)
     end
   end
 end
+
 }
 
 file 'config/environment.rb', %{
@@ -176,7 +179,7 @@ Rails::Initializer.run do |config|
 
   config.load_paths += %W( \#{RAILS_ROOT}/app/panels \#{RAILS_ROOT}/app/presenters \#{RAILS_ROOT}/app/middleware )
 
-  config.action_controller.page_cache_directory = RAILS_ROOT + "/public/cache/"
+  \# config.action_controller.page_cache_directory = RAILS_ROOT + "/public/cache/"
 
   config.middleware.use(Rack::Cache, :verbose => true, :metastore => "file:\#{CMS.metastore}", :entitystore => "file:\#{CMS.entitystore}")
 
@@ -226,31 +229,30 @@ require 'rake/rdoctask'
 require 'tasks/rails'
 require 'tasks/cms'
 
-require 'sunspot/rails/tasks'
 }
 
 # Sunspot
-file 'config/sunspot.yml', %{
-  production:
-    solr:
-      hostname: localhost
-      port: #{solr_port.to_i + 2}
-      log_level: WARNING
-
-  development:
-    solr:
-      hostname: localhost
-      port: #{solr_port.to_i + 1}
-      log_level: INFO
-
-  test:
-    solr:
-      hostname: localhost
-      port: #{solr_port}
-      log_level: WARNING
-}
-
-rake "sunspot:solr:start"
+#file 'config/sunspot.yml', %{
+#  production:
+#    solr:
+#      hostname: localhost
+#      port: #{solr_port.to_i + 2}
+#      log_level: WARNING
+#
+#  development:
+#    solr:
+#      hostname: localhost
+#      port: #{solr_port.to_i + 1}
+#      log_level: INFO
+#
+#  test:
+#    solr:
+#      hostname: localhost
+#      port: #{solr_port}
+#      log_level: WARNING
+#}
+#
+#rake "sunspot:solr:start"
 
 # Database
 if (database == 'mysql')
@@ -262,15 +264,15 @@ development: &base
   host: localhost
   username: #{db_user}
   password: #{db_pass}
-  database: cms_#{app_name}
+  database: #{app_name}
 
 test:
   <<: *base
-  database: cms_#{app_name}_test
+  database: #{app_name}_test
 
 production:
   <<: *base
-  database: cms_#{app_name}
+  database: #{app_name}
 CODE
 end
 
